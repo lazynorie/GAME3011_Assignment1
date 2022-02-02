@@ -9,7 +9,7 @@ public struct Cell
         MAX,
         MED,
         MIN,
-        MMin
+        EMPTY
     }
 
     public Vector3Int position;

@@ -11,7 +11,7 @@ public class Board : MonoBehaviour
     public Tile tileUnknown;
     public Tile Gold;
     public Tile Silver;
-    public Tile Bronze;
+    public Tile Copper;
     public Tile Iron;
     
     private void Awake()
@@ -29,7 +29,7 @@ public class Board : MonoBehaviour
             for (int y= 0; y < height; y++)
             {
                 Cell cell = state[x, y];
-                //tilemap.SetTile(cell.position, GetTile(cell));
+                tilemap.SetTile(cell.position, GetTile(cell));
             }
         }
     }
@@ -50,8 +50,8 @@ public class Board : MonoBehaviour
     {
         switch (cell.type)
         {
-            case Cell.Type.MMin: return Iron;
-            case Cell.Type.MIN: return Bronze;
+            case Cell.Type.EMPTY: return Iron;
+            case Cell.Type.MIN: return Copper;
             case Cell.Type.MED: return Silver;
             case Cell.Type.MAX: return Gold;
             default: return null;
