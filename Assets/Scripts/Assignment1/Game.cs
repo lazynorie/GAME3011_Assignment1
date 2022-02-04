@@ -51,7 +51,7 @@ public class Game : MonoBehaviour
                 state[x, y] = cell;
                 
                 //reveal all maps for now
-                state[x, y].scanned = true;
+                //state[x, y].scanned = true;
             }
         }
     }
@@ -82,7 +82,7 @@ public class Game : MonoBehaviour
             state[x, y].type = Cell.Type.MAX;
             
             //visializing for testing purpose
-            state[x, y].scanned = true;
+            //state[x, y].scanned = true;
         }
     }
 
@@ -146,13 +146,48 @@ public class Game : MonoBehaviour
         state[cellx, celly].type = Cell.Type.MAX;
     }
 
-    public void ClickToMine()
+    private void Update()
     {
-        
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (scancount <= 0) return;
+            
+            Extract();
+        }
     }
 
-    private void OnMouseDown()
+    private void Extract()
     {
-        
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3Int cellPosition = board.tilemap.WorldToCell(worldPosition);
+        Cell cell = GetCell(cellPosition.x, cellPosition.y);
+
+        if (cell.type == Cell.Type.INVALID)
+        {
+            return;
+        }
+
+        cell.scanned = true;
+        state[cellPosition.x, cellPosition.y] = cell;
+        board.Draw(state);
+        scancount--;
     }
+
+    private Cell GetCell(int x, int y)
+    {
+        if (IsValid(x, y))
+        {
+            return state[x, y];
+        }
+        else
+        {
+            return new Cell();
+        }
+    }
+
+    private bool IsValid(int x, int y)
+    {
+        return x >= 0 && x < width && y >= 0 && y < height;
+    }
+
 }
