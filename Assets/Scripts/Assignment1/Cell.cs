@@ -16,5 +16,4 @@ public struct Cell
     public Type type;
 
     public bool scanned;
-    
 }

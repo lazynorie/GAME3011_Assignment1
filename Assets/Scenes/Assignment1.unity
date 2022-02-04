@@ -184,6 +184,7 @@ MonoBehaviour:
   height: 16
   goldcount: 3
   scancount: 3
+  resource: 0
 --- !u!1 &1141901655
 GameObject:
   m_ObjectHideFlags: 0
