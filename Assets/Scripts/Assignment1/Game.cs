@@ -10,12 +10,13 @@ public class Game : MonoBehaviour
     public int height = 32;
     public int goldcount = 3;
     public int scancount = 3;
+    public int scanModeCount = 6;
 
     private Board board;
     private Cell[,] state;
 
     public int resource = 0;
-    
+    public bool scanModeOn;
     
     private void Awake()
     {
@@ -24,10 +25,20 @@ public class Game : MonoBehaviour
 
     private void Start()
     {
-        NewGame();
+        print(scanModeOn);
     }
 
-    private void NewGame()
+    private void Update()
+    {
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (scancount <= 0) return;
+            
+            Extract();
+        }
+    }
+
+    public void NewGame()
     {
         state = new Cell[width, height];
 
@@ -146,15 +157,6 @@ public class Game : MonoBehaviour
         state[cellx, celly].type = Cell.Type.MAX;
     }
 
-    private void Update()
-    {
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (scancount <= 0) return;
-            
-            Extract();
-        }
-    }
 
     private void Extract()
     {
@@ -171,6 +173,11 @@ public class Game : MonoBehaviour
         state[cellPosition.x, cellPosition.y] = cell;
         board.Draw(state);
         scancount--;
+    }
+
+    private void Scan()
+    {
+
     }
 
     private Cell GetCell(int x, int y)
