@@ -180,9 +180,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53935dff2355bf549b4091350b6f27d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  width: 16
-  height: 16
-  goldcount: 3
+  width: 32
+  height: 32
+  goldcount: 5
   scancount: 3
   resource: 0
 --- !u!1 &1141901655

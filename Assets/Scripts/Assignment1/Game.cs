@@ -88,7 +88,6 @@ public class Game : MonoBehaviour
 
     public void GenerateSurroundingResource()
     {
-       
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -105,6 +104,26 @@ public class Game : MonoBehaviour
 
     public void fillSurroundings(int cellx, int celly)
     {
+        for (int adjacentX =-2; adjacentX <=2; adjacentX++)
+        {
+            for (int adjacentY =-2; adjacentY <= 2; adjacentY++)
+            {
+
+                if (adjacentX == 0 && adjacentY == 0)
+                {
+                    continue;
+                }
+                int x = cellx + adjacentX;
+                int y = celly + adjacentY;
+                
+                if (x<0 || x > width || y < 0 || y>= height)
+                {
+                    continue;
+                }
+                
+                state[x, y].type = Cell.Type.MIN;
+            }
+        }
         for (int adjacentX =-1; adjacentX <=1; adjacentX++)
         {
             for (int adjacentY =-1; adjacentY <= 1; adjacentY++)
@@ -116,7 +135,11 @@ public class Game : MonoBehaviour
                 }
                 int x = cellx + adjacentX;
                 int y = celly + adjacentY;
-                
+
+                if (x<0 || x > width || y < 0 || y>= height)
+                {
+                    continue;
+                }
                 state[x, y].type = Cell.Type.MED;
             }
         }
