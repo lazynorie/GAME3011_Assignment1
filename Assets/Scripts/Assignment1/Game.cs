@@ -9,14 +9,17 @@ public class Game : MonoBehaviour
     public int width = 32;
     public int height = 32;
     public int goldcount = 3;
-    public int scancount = 3;
+    public int extractCount = 3;
+    public int scanCount = 6;
 
     private Board board;
     private Cell[,] state;
 
     public int resource = 0;
-    
-    
+    public bool scanModeOn;
+    public GameObject gameoverScreen;
+    private bool gameStart;   // This is stupid but it works for now hehe
+
     private void Awake()
     {
         board = GetComponentInChildren<Board>();
@@ -24,11 +27,38 @@ public class Game : MonoBehaviour
 
     private void Start()
     {
-        NewGame();
+        print(scanModeOn);
     }
 
-    private void NewGame()
+    private void Update()
     {
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (gameStart)
+            {
+                switch (scanModeOn)
+                {
+                    case false:
+                        if (extractCount <= 0) return;
+                        Extract();
+                        break;
+
+                    case true:
+                        if (scanCount <= 0) return;
+                        Scan();
+                        break;
+                }
+            }
+        }
+    }
+
+    public void NewGame()
+    {
+        gameoverScreen.SetActive(false);
+        extractCount = 3;
+        scanCount = 6;
+        resource = 0;
+
         state = new Cell[width, height];
 
         GenerateCells();
@@ -37,6 +67,7 @@ public class Game : MonoBehaviour
 
         Camera.main.transform.position = new Vector3(width / 2f, height / 2f, -10f);
         board.Draw(state);
+        gameStart = true;
     }
 
     private void GenerateCells()
@@ -51,7 +82,7 @@ public class Game : MonoBehaviour
                 state[x, y] = cell;
                 
                 //reveal all maps for now
-                state[x, y].scanned = true;
+                //state[x, y].scanned = true;
             }
         }
     }
@@ -60,14 +91,14 @@ public class Game : MonoBehaviour
     {
         for (int i = 0; i < goldcount; i++)
         {
-            int x = Random.Range(0, width-2); 
-            int y = Random.Range(0, height-2);
+            int x = Random.Range(0, width - 2); 
+            int y = Random.Range(0, height - 2);
 
             while (state[x,y].type == Cell.Type.MAX)
             {
                 x++;
 
-                if (x>width)
+                if (x > width)
                 {
                     x = 0;
                     y++;
@@ -82,7 +113,7 @@ public class Game : MonoBehaviour
             state[x, y].type = Cell.Type.MAX;
             
             //visializing for testing purpose
-            state[x, y].scanned = true;
+            //state[x, y].scanned = true;
         }
     }
 
@@ -116,11 +147,11 @@ public class Game : MonoBehaviour
                 int x = cellx + adjacentX;
                 int y = celly + adjacentY;
                 
-                if (x<0 || x > width || y < 0 || y>= height)
+                if (x<0 || x >= width || y < 0 || y>= height)
                 {
                     continue;
                 }
-                
+               
                 state[x, y].type = Cell.Type.MIN;
             }
         }
@@ -136,23 +167,151 @@ public class Game : MonoBehaviour
                 int x = cellx + adjacentX;
                 int y = celly + adjacentY;
 
-                if (x<0 || x > width || y < 0 || y>= height)
+                if (x<0 || x >= width || y < 0 || y>= height)
                 {
                     continue;
                 }
                 state[x, y].type = Cell.Type.MED;
             }
         }
-        state[cellx, celly].type = Cell.Type.MAX;
+        //state[cellx, celly].type = Cell.Type.MAX;
     }
 
-    public void ClickToMine()
+
+    private void UpdateResourceValue(int cellx, int celly)
     {
+        for (int adjacentX = -2; adjacentX <= 2; adjacentX++)
+        {
+            for (int adjacentY = -2; adjacentY <= 2; adjacentY++)
+            {
+                int x = cellx + adjacentX;
+                int y = celly + adjacentY;
+
+                if (x < 0 || x >= width || y < 0 || y >= height)
+                {
+                    continue;
+                }
+
+                //state[x, y].type = Cell.Type.MIN;
+                switch (state[x, y].type)
+                {
+                    case Cell.Type.EMPTY:
+                        continue;
+                    case Cell.Type.MIN:
+                        state[x, y].type = Cell.Type.EMPTY;
+                        break;
+                    case Cell.Type.MED:
+                        state[x, y].type = Cell.Type.MIN;
+                        break;
+                    case Cell.Type.MAX:
+                        state[x, y].type = Cell.Type.MED;
+                        break;
+
+                }
+            }
+        }
+    }
+
+
+    private void Extract()
+    {
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3Int cellPosition = board.tilemap.WorldToCell(worldPosition);
+        Cell cell = GetCell(cellPosition.x, cellPosition.y);
+
+        if (cell.type == Cell.Type.INVALID)
+        {
+            return;
+        }
+
+        cell.scanned = true;
+        state[cellPosition.x, cellPosition.y] = cell;
+        extractCount--;
+
+        if (cell.type == Cell.Type.MAX)
+        {
+            resource += 8;
+        }
+        else if (cell.type == Cell.Type.MED)
+        {
+            resource += 4;
+        }
+        else if (cell.type == Cell.Type.MIN)
+        {
+            resource += 2;
+        }
+        else if (cell.type == Cell.Type.EMPTY)
+        {
+            resource += 1;
+        }
+
+        UpdateResourceValue(cellPosition.x, cellPosition.y);
+        board.Draw(state);
+
+        GameoverCheck();
+    }
+
+    private void Scan()
+    {
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3Int cellPosition = board.tilemap.WorldToCell(worldPosition);
+        Cell cell = GetCell(cellPosition.x, cellPosition.y);
+
+        if (cell.type == Cell.Type.INVALID)
+        {
+            return;
+        }
+
+
+        for (int adjacentX = -2; adjacentX <= 2; adjacentX++)
+        {
+            for (int adjacentY = -2; adjacentY <= 2; adjacentY++)
+            {
+                int x = cellPosition.x + adjacentX;
+                int y = cellPosition.y + adjacentY;
+
+                if (x < 0 || x >= width || y < 0 || y >= height)
+                {
+                    continue;
+                }
+
+                state[x, y].scanned = true;
+                board.Draw(state);
+            }
+            
+        }
+
+        scanCount--;
         
     }
 
-    private void OnMouseDown()
+    private Cell GetCell(int x, int y)
     {
-        
+        if (IsValid(x, y))
+        {
+            return state[x, y];
+        }
+        else
+        {
+            return new Cell();
+        }
+    }
+
+    private bool IsValid(int x, int y)
+    {
+        return x >= 0 && x < width && y >= 0 && y < height;
+    }
+
+    private void GameoverCheck()
+    {
+        if (extractCount == 0)
+        {
+            StartCoroutine(DisplayGameover());
+        }
+    }
+    IEnumerator DisplayGameover()
+    {
+        yield return new WaitForSeconds(1f);
+        gameoverScreen.SetActive(true);
     }
 }

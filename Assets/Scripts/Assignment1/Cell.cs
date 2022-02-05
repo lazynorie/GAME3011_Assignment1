@@ -6,6 +6,7 @@ public struct Cell
 {
     public enum Type
     {
+        INVALID,
         MAX,
         MED,
         MIN,
