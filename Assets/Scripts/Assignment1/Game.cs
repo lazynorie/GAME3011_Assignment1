@@ -18,6 +18,7 @@ public class Game : MonoBehaviour
     public int resource = 0;
     public bool scanModeOn;
     public GameObject gameoverScreen;
+    private bool gameStart;   // This is stupid but it works for now hehe
 
     private void Awake()
     {
@@ -33,9 +34,21 @@ public class Game : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            if (extractCount <= 0) return;
-            
-            Extract();
+            if (gameStart)
+            {
+                switch (scanModeOn)
+                {
+                    case false:
+                        if (extractCount <= 0) return;
+                        Extract();
+                        break;
+
+                    case true:
+                        if (scanCount <= 0) return;
+                        Scan();
+                        break;
+                }
+            }
         }
     }
 
@@ -54,6 +67,7 @@ public class Game : MonoBehaviour
 
         Camera.main.transform.position = new Vector3(width / 2f, height / 2f, -10f);
         board.Draw(state);
+        gameStart = true;
     }
 
     private void GenerateCells()
@@ -68,7 +82,7 @@ public class Game : MonoBehaviour
                 state[x, y] = cell;
                 
                 //reveal all maps for now
-                state[x, y].scanned = true;
+                //state[x, y].scanned = true;
             }
         }
     }
@@ -239,11 +253,36 @@ public class Game : MonoBehaviour
 
     private void Scan()
     {
+        Vector3 worldPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        Vector3Int cellPosition = board.tilemap.WorldToCell(worldPosition);
+        Cell cell = GetCell(cellPosition.x, cellPosition.y);
+
+        if (cell.type == Cell.Type.INVALID)
+        {
+            return;
+        }
 
 
+        for (int adjacentX = -2; adjacentX <= 2; adjacentX++)
+        {
+            for (int adjacentY = -2; adjacentY <= 2; adjacentY++)
+            {
+                int x = cellPosition.x + adjacentX;
+                int y = cellPosition.y + adjacentY;
 
+                if (x < 0 || x >= width || y < 0 || y >= height)
+                {
+                    continue;
+                }
 
+                state[x, y].scanned = true;
+                board.Draw(state);
+            }
+            
+        }
 
+        scanCount--;
+        
     }
 
     private Cell GetCell(int x, int y)
