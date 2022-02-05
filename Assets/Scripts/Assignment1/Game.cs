@@ -9,15 +9,16 @@ public class Game : MonoBehaviour
     public int width = 32;
     public int height = 32;
     public int goldcount = 3;
-    public int scancount = 3;
-    public int scanModeCount = 6;
+    public int extractCount = 3;
+    public int scanCount = 6;
 
     private Board board;
     private Cell[,] state;
 
     public int resource = 0;
     public bool scanModeOn;
-    
+    public GameObject gameoverScreen;
+
     private void Awake()
     {
         board = GetComponentInChildren<Board>();
@@ -32,7 +33,7 @@ public class Game : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            if (scancount <= 0) return;
+            if (extractCount <= 0) return;
             
             Extract();
         }
@@ -40,6 +41,11 @@ public class Game : MonoBehaviour
 
     public void NewGame()
     {
+        gameoverScreen.SetActive(false);
+        extractCount = 3;
+        scanCount = 6;
+        resource = 0;
+
         state = new Cell[width, height];
 
         GenerateCells();
@@ -127,11 +133,11 @@ public class Game : MonoBehaviour
                 int x = cellx + adjacentX;
                 int y = celly + adjacentY;
                 
-                if (x<0 || x > width || y < 0 || y>= height)
+                if (x<0 || x >= width || y < 0 || y>= height)
                 {
                     continue;
                 }
-                
+               
                 state[x, y].type = Cell.Type.MIN;
             }
         }
@@ -147,15 +153,16 @@ public class Game : MonoBehaviour
                 int x = cellx + adjacentX;
                 int y = celly + adjacentY;
 
-                if (x<0 || x > width || y < 0 || y>= height)
+                if (x<0 || x >= width || y < 0 || y>= height)
                 {
                     continue;
                 }
                 state[x, y].type = Cell.Type.MED;
             }
         }
-        state[cellx, celly].type = Cell.Type.MAX;
+        //state[cellx, celly].type = Cell.Type.MAX;
     }
+
 
     private void UpdateResourceValue(int cellx, int celly)
     {
@@ -163,20 +170,30 @@ public class Game : MonoBehaviour
         {
             for (int adjacentY = -2; adjacentY <= 2; adjacentY++)
             {
-
-                if (adjacentX == 0 && adjacentY == 0)
-                {
-                    continue;
-                }
                 int x = cellx + adjacentX;
                 int y = celly + adjacentY;
 
-                if (x < 0 || x > width || y < 0 || y >= height)
+                if (x < 0 || x >= width || y < 0 || y >= height)
                 {
                     continue;
                 }
 
-                state[x, y].type = Cell.Type.MIN;
+                //state[x, y].type = Cell.Type.MIN;
+                switch (state[x, y].type)
+                {
+                    case Cell.Type.EMPTY:
+                        continue;
+                    case Cell.Type.MIN:
+                        state[x, y].type = Cell.Type.EMPTY;
+                        break;
+                    case Cell.Type.MED:
+                        state[x, y].type = Cell.Type.MIN;
+                        break;
+                    case Cell.Type.MAX:
+                        state[x, y].type = Cell.Type.MED;
+                        break;
+
+                }
             }
         }
     }
@@ -195,7 +212,7 @@ public class Game : MonoBehaviour
 
         cell.scanned = true;
         state[cellPosition.x, cellPosition.y] = cell;
-        scancount--;
+        extractCount--;
 
         if (cell.type == Cell.Type.MAX)
         {
@@ -216,10 +233,16 @@ public class Game : MonoBehaviour
 
         UpdateResourceValue(cellPosition.x, cellPosition.y);
         board.Draw(state);
+
+        GameoverCheck();
     }
 
     private void Scan()
     {
+
+
+
+
 
     }
 
@@ -240,4 +263,16 @@ public class Game : MonoBehaviour
         return x >= 0 && x < width && y >= 0 && y < height;
     }
 
+    private void GameoverCheck()
+    {
+        if (extractCount == 0)
+        {
+            StartCoroutine(DisplayGameover());
+        }
+    }
+    IEnumerator DisplayGameover()
+    {
+        yield return new WaitForSeconds(1f);
+        gameoverScreen.SetActive(true);
+    }
 }

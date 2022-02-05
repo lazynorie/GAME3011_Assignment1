@@ -13,6 +13,7 @@ public class UIBehaviour : MonoBehaviour
     public TextMeshProUGUI currentMode;
     public TextMeshProUGUI extractCounter;
     public TextMeshProUGUI scanCounter;
+    public TextMeshProUGUI finalScore;
 
     private string getCurrentMode;
 
@@ -27,8 +28,9 @@ public class UIBehaviour : MonoBehaviour
     {
         resourceGathered.text = "Resource collected: " + game.resource;
         currentMode.text = "Current Mode: " + getCurrentMode;
-        extractCounter.text = "Extract left: " + game.scancount;
-        scanCounter.text = "Scan left: " + game.scanModeCount;
+        extractCounter.text = "Extract left: " + game.extractCount;
+        scanCounter.text = "Scan left: " + game.scanCount;
+        finalScore.text = game.resource.ToString();
     }
 
     public void StartNewGame()
@@ -46,5 +48,5 @@ public class UIBehaviour : MonoBehaviour
         else getCurrentMode = "EXTRACT";
     }
 
-
+    
 }
