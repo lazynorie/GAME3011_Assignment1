@@ -62,7 +62,7 @@ public class Game : MonoBehaviour
                 state[x, y] = cell;
                 
                 //reveal all maps for now
-                //state[x, y].scanned = true;
+                state[x, y].scanned = true;
             }
         }
     }
@@ -71,14 +71,14 @@ public class Game : MonoBehaviour
     {
         for (int i = 0; i < goldcount; i++)
         {
-            int x = Random.Range(0, width-2); 
-            int y = Random.Range(0, height-2);
+            int x = Random.Range(0, width - 2); 
+            int y = Random.Range(0, height - 2);
 
             while (state[x,y].type == Cell.Type.MAX)
             {
                 x++;
 
-                if (x>width)
+                if (x > width)
                 {
                     x = 0;
                     y++;
@@ -173,6 +173,23 @@ public class Game : MonoBehaviour
         state[cellPosition.x, cellPosition.y] = cell;
         board.Draw(state);
         scancount--;
+
+        if (cell.type == Cell.Type.MAX)
+        {
+            resource += 8;
+        }
+        else if (cell.type == Cell.Type.MED)
+        {
+            resource += 4;
+        }
+        else if (cell.type == Cell.Type.MIN)
+        {
+            resource += 2;
+        }
+        else if (cell.type == Cell.Type.EMPTY)
+        {
+            resource += 1;
+        }
     }
 
     private void Scan()
