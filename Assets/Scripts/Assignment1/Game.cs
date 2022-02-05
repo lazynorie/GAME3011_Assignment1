@@ -157,6 +157,30 @@ public class Game : MonoBehaviour
         state[cellx, celly].type = Cell.Type.MAX;
     }
 
+    private void UpdateResourceValue(int cellx, int celly)
+    {
+        for (int adjacentX = -2; adjacentX <= 2; adjacentX++)
+        {
+            for (int adjacentY = -2; adjacentY <= 2; adjacentY++)
+            {
+
+                if (adjacentX == 0 && adjacentY == 0)
+                {
+                    continue;
+                }
+                int x = cellx + adjacentX;
+                int y = celly + adjacentY;
+
+                if (x < 0 || x > width || y < 0 || y >= height)
+                {
+                    continue;
+                }
+
+                state[x, y].type = Cell.Type.MIN;
+            }
+        }
+    }
+
 
     private void Extract()
     {
@@ -171,7 +195,6 @@ public class Game : MonoBehaviour
 
         cell.scanned = true;
         state[cellPosition.x, cellPosition.y] = cell;
-        board.Draw(state);
         scancount--;
 
         if (cell.type == Cell.Type.MAX)
@@ -190,6 +213,9 @@ public class Game : MonoBehaviour
         {
             resource += 1;
         }
+
+        UpdateResourceValue(cellPosition.x, cellPosition.y);
+        board.Draw(state);
     }
 
     private void Scan()
